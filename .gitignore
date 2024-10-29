@@ -24,8 +24,10 @@ include/
 man/
 venv/
 *.egg-info/
+*database.db
 .installed.cfg
 *.egg
+*images/
 
 # Installer logs
 pip-log.txt

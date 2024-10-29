@@ -5,3 +5,5 @@ sqlalchemy
 python-dotenv
 alembic
 aiosqlite
+python-multipart
+pillow

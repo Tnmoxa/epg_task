@@ -1,16 +1,8 @@
-from sqlite3 import IntegrityError
-
 import bcrypt
-
-from sqlalchemy import select
-from epg.database import storage_models as sm
-
-from pydantic import model_validator, BaseModel, EmailStr, ValidationError
-from epg.dependencies import database as db
+from pydantic import model_validator, BaseModel, EmailStr
 
 
 class User(BaseModel):
-    avatar: str
     gender: str
     first_name: str
     last_name: str

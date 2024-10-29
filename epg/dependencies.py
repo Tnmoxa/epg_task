@@ -1,7 +1,6 @@
 import os
 from contextlib import asynccontextmanager
 
-from alembic import command
 from alembic.config import Config
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
@@ -21,6 +20,7 @@ class Database:
 
 
 database = Database(os.environ.get('DATABASE_URL'))
+
 alembic_cfg = Config("./alembic.ini")
 
 
@@ -29,6 +29,6 @@ async def lifespan(_):
     # Инициализация БД
     # if not os.path.exists(os.environ.get('DATABASE_URL')):
     #     command.upgrade(alembic_cfg, "head")
-        # print("Database upgraded to the latest revision.")
+    # print("Database upgraded to the latest revision.")
 
     yield
