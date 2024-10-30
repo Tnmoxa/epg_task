@@ -128,3 +128,61 @@ async def test_match_rating_limit(db):
         await delete_user(db, f'{i}' + TEST_EMAIL)
 
     await delete_user(db, TEST_EMAIL)
+
+
+async def advanced_register_user(username: str, gender: str, first_name: str, last_name: str, email: str):
+    avatar_file = Path(avatar_path)
+    with avatar_file.open("rb") as avatar_data:
+        response = client.post(
+            "/api/clients/create",
+            files={"avatar": (avatar_file.name, avatar_data, "image/png")},
+            data={
+                "username": username,
+                "gender": gender,
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+                "password": TEST_PASSWORD,
+            },
+        )
+    return response
+
+
+@pytest.mark.asyncio
+async def test_get_user_list(db):
+    await advanced_register_user("test_username1", "male", "first_name1", "last_name2", "test_username1@example.com")
+    await advanced_register_user("test_username2", "male", "first_name2", "last_name2", "test_username2@example.com")
+    await advanced_register_user("test_username3", "female", "first_name1", "last_name1", "test_username3@example.com")
+    await advanced_register_user("test_username4", "female", "first_name2", "last_name1", "test_username4@example.com")
+
+    response = client.get("/api/list", params={"first_name": "first_name1"})
+    assert response.status_code == 200
+    users = response.json()['users']
+    assert all(user["first_name"] == "first_name1" for user in users)
+
+    response = client.get("/api/list", params={"gender": "male"})
+    assert response.status_code == 200
+    users = response.json()['users']
+    assert all(user["gender"] == "male" for user in users)
+
+    response = client.get("/api/list", params={"last_name": "last_name2"})
+    assert response.status_code == 200
+    users = response.json()['users']
+    assert all(user["last_name"] == "last_name2" for user in users)
+
+    response = client.get("/api/list", params={"sort_by_registration_date": "asc"})
+    assert response.status_code == 200
+    users = response.json()['users']
+    dates = [user["date"] for user in users]
+    assert dates == sorted(dates)
+
+    response = client.get("/api/list", params={"sort_by_registration_date": "desc"})
+    assert response.status_code == 200
+    users = response.json()['users']
+    dates = [user["date"] for user in users]
+    assert dates == sorted(dates, reverse=True)
+
+    await delete_user(db, "filter1@example.com")
+    await delete_user(db, "filter2@example.com")
+    await delete_user(db, "sort1@example.com")
+    await delete_user(db, "sort2@example.com")

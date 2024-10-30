@@ -55,26 +55,21 @@ def add_watermark(avatar_data: bytes) -> str:
 
 @app.post("/create")
 async def create(avatar: UploadFile,
-                 gender: str = Form(...),
-                 first_name: str = Form(...),
-                 last_name: str = Form(...),
-                 email: EmailStr = Form(...),
-                 password: str = Form(...),
+                 user: am.User = Depends(am.User.as_form),
                  db: AsyncSession = Depends(database)):
     try:
         avatar_bytes = await avatar.read()
 
         hash_part = await run_in_threadpool(add_watermark, avatar_bytes)
 
-        user = am.AuthUser(email=email, password=password)
-
         user_instance = sm.User(
-            gender=gender,
+            gender=user.gender,
             avatar=os.path.join(images_path, f'{hash_part}.png'),
-            first_name=first_name,
-            last_name=last_name,
+            first_name=user.first_name,
+            last_name=user.last_name,
             email=user.email,
-            password=user.password
+            password=user.password,
+            date=datetime.datetime.now()
         )
         db.add(user_instance)
         await db.commit()

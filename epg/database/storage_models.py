@@ -20,6 +20,7 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
+    date: Mapped[datetime] = mapped_column(nullable=False)
 
 
 class Rating(Base):
