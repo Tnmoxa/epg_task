@@ -7,3 +7,4 @@ alembic
 aiosqlite
 python-multipart
 pillow
+aiosmtplib
