@@ -1,0 +1,8 @@
+.env
+.idea
+.venv
+*.egg-info/
+*database.db
+.installed.cfg
+*.egg
+*images/

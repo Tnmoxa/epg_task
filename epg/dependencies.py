@@ -51,8 +51,12 @@ class Storage:
     def __init__(self, url):
         self.client = redis.from_url(url)
 
-    def __call__(self):
-        return self.client
+    async def __call__(self):
+        try:
+            await self.client.ping()
+            return self.client
+        except redis.ConnectionError:
+            return None
 
 
 storage = Storage(os.environ.get('REDIS_URL'))
@@ -64,9 +68,4 @@ alembic_cfg = Config("./alembic.ini")
 
 @asynccontextmanager
 async def lifespan(_):
-    # Инициализация БД
-    # if not os.path.exists(os.environ.get('DATABASE_URL')):
-    #     command.upgrade(alembic_cfg, "head")
-    # print("Database upgraded to the latest revision.")
-
     yield

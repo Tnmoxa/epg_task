@@ -1,0 +1,32 @@
+networks:
+  epg:
+    driver: bridge
+
+services:
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: epg-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - epg
+
+
+  backend:
+    depends_on:
+      - redis
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: "uvicorn epg.endpoints:app --host 0.0.0.0 --port 8080"
+    container_name: epg-backend
+    networks:
+      - epg
+    environment:
+      DATABASE_URL: "sqlite+aiosqlite:///epg/database/database.db"
+      SMTP_EMAIL_FROM: "SMTP_EMAIL_FROM"
+      SMTP_EMAIL_FROM_PASSWORD: "SMTP_EMAIL_FROM"
+      RATING_LIMIT_PER_DAY: 5
+      REDIS_URL: "redis://redis:6379"
+    ports:
+      - "8080:8080"

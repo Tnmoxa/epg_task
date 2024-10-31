@@ -1,15 +1,14 @@
 from http.client import HTTPException
 from typing import Optional
 
+from epg.database import storage_models as sm
+from epg.dependencies import database
+from epg.utils import calculate_distance
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import EmailStr
 from sqlalchemy import asc, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
-from epg.database import storage_models as sm
-from epg.dependencies import database
-from epg.utils import calculate_distance
 
 app = APIRouter()
 
@@ -51,7 +50,8 @@ async def get_user_list(
                                      user.longitude and
                                      await calculate_distance(current_user.latitude, current_user.longitude,
                                                               user.latitude,
-                                                              user.longitude) < distance]
+                                                              user.longitude) < distance
+                                     and user.email != current_user.email]
             return {"users": users_within_distance}
         return {"users": users}
     except Exception as e:
