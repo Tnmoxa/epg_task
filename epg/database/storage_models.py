@@ -21,6 +21,8 @@ class User(Base):
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
     date: Mapped[datetime] = mapped_column(nullable=False)
+    latitude: Mapped[float] = mapped_column()
+    longitude: Mapped[float] = mapped_column()
 
 
 class Rating(Base):

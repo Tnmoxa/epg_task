@@ -1,6 +1,6 @@
 import bcrypt
-from pydantic import model_validator, BaseModel, EmailStr
 from fastapi import Form
+from pydantic import model_validator, BaseModel, EmailStr
 
 
 class User(BaseModel):
@@ -9,6 +9,8 @@ class User(BaseModel):
     last_name: str
     email: EmailStr
     password: str
+    latitude: float
+    longitude: float
 
     @model_validator(mode='after')
     def hash_password(self) -> 'User':
@@ -24,12 +26,14 @@ class User(BaseModel):
 
     @classmethod
     def as_form(
-        cls,
-        gender: str = Form(...),
-        first_name: str = Form(...),
-        last_name: str = Form(...),
-        email: EmailStr = Form(...),
-        password: str = Form(...),
+            cls,
+            gender: str = Form(...),
+            first_name: str = Form(...),
+            last_name: str = Form(...),
+            email: EmailStr = Form(...),
+            password: str = Form(...),
+            latitude: float = Form(...),
+            longitude: float = Form(...),
     ):
         return cls(
             gender=gender,
@@ -37,5 +41,6 @@ class User(BaseModel):
             last_name=last_name,
             email=email,
             password=password,
+            longitude=longitude,
+            latitude=latitude
         )
-

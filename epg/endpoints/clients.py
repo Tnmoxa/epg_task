@@ -4,8 +4,7 @@ import os.path
 from io import BytesIO
 
 from PIL import Image
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi import UploadFile, Form
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import EmailStr
@@ -69,7 +68,9 @@ async def create(avatar: UploadFile,
             last_name=user.last_name,
             email=user.email,
             password=user.password,
-            date=datetime.datetime.now()
+            date=datetime.datetime.now(),
+            latitude=user.latitude,
+            longitude=user.longitude
         )
         db.add(user_instance)
         await db.commit()
@@ -81,7 +82,7 @@ async def create(avatar: UploadFile,
 @app.post("/{id}/match")
 async def match(
         id: int,
-        email: EmailStr = Form(...),
+        email: EmailStr = Query(description="Почта текущего пользователя"),
         db: AsyncSession = Depends(database)
 ):
     try:
