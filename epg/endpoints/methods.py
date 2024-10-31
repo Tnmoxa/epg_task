@@ -49,8 +49,9 @@ async def get_user_list(
             users_within_distance = [user for user in users if
                                      user.latitude and
                                      user.longitude and
-                                     calculate_distance(current_user.latitude, current_user.longitude, user.latitude,
-                                                        user.longitude) < distance]
+                                     await calculate_distance(current_user.latitude, current_user.longitude,
+                                                              user.latitude,
+                                                              user.longitude) < distance]
             return {"users": users_within_distance}
         return {"users": users}
     except Exception as e:

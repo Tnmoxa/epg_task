@@ -4,6 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import aiosmtplib
+import redis.asyncio as redis
 from alembic.config import Config
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
@@ -20,6 +21,7 @@ class Database:
     async def __call__(self):
         async with self._async_session() as session:
             yield session
+
 
 # Класс отправщика сообщений на почту
 class EmailSender:
@@ -43,6 +45,17 @@ class EmailSender:
         except Exception as e:
             print(f"Произошла ошибка при отправке почты: {e}")
 
+
+# Класс хранилища redis
+class Storage:
+    def __init__(self, url):
+        self.client = redis.from_url(url)
+
+    def __call__(self):
+        return self.client
+
+
+storage = Storage(os.environ.get('REDIS_URL'))
 
 database = Database(os.environ.get('DATABASE_URL'))
 email_sender = EmailSender()
