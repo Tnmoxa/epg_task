@@ -4,6 +4,21 @@ from epg.dependencies import storage
 
 
 async def calculate_distance(lat1, lon1, lat2, lon2):
+    """
+        Вычисляет расстояние по дуге большого круга между двумя точками на поверхности Земли,
+        указанными их широтой и долготой в градусах. Кэширует результат в Redis
+        для будущих запросов с теми же координатами.
+
+        Args:
+            lat1 (float): Широта первой точки в градусах.
+            lon1 (float): Долгота первой точки в градусах.
+            lat2 (float): Широта второй точки в градусах.
+            lon2 (float): Долгота второй точки в градусах.
+
+        Returns:
+            float: Расстояние между двумя точками в километрах.
+        """
+
     cache_key = f"distance:{lat1}:{lon1}:{lat2}:{lon2}"
     if await storage():
         cached_distance = await (await storage()).get(cache_key)

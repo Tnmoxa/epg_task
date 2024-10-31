@@ -15,7 +15,9 @@ $ docker compose up
 
 Для запуска тестов необходимы переменные  
 DATABASE_URL="sqlite+aiosqlite:///epg/database/database.db"  
-SMTP_EMAIL_FROM - адрес почты для рассылки писем  
-SMTP_EMAIL_FROM_PASSWORD - пароль почты для рассылки писем  
+SMTP_EMAIL_FROM - Адрес электронной почты, используемый для отправки писем.
+SMTP_EMAIL_FROM_PASSWORD - Пароль для учетной записи электронной почты отправителя.
+SMTP_SERVER - Адрес SMTP-сервера.
+PORT - Порт SMTP-сервера.
 RATING_LIMIT_PER_DAY - количество оценок в день  
 REDIS_URL - урл на редис  

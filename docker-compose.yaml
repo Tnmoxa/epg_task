@@ -28,5 +28,7 @@ services:
       SMTP_EMAIL_FROM_PASSWORD: "SMTP_EMAIL_FROM"
       RATING_LIMIT_PER_DAY: 5
       REDIS_URL: "redis://redis:6379"
+      SMTP_SERVER: "smtp.mail.ru"
+      PORT: 465
     ports:
       - "8080:8080"

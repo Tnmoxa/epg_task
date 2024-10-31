@@ -4,6 +4,9 @@ import os.path
 from io import BytesIO
 
 from PIL import Image
+from epg.database import api_models as am
+from epg.database import storage_models as sm
+from epg.dependencies import database, email_sender
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.security import OAuth2PasswordBearer
@@ -11,10 +14,6 @@ from pydantic import EmailStr
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
-from epg.database import api_models as am
-from epg.database import storage_models as sm
-from epg.dependencies import database, email_sender
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="clients/token")
 app = APIRouter()
@@ -27,6 +26,17 @@ RATING_LIMIT_PER_DAY = int(os.environ.get('RATING_LIMIT_PER_DAY'))
 
 
 def add_watermark(avatar_data: bytes) -> str:
+    """
+    Добавляет водяной знак к изображению аватара и сохраняет его.
+
+    Args:
+        avatar_data: Исходные данные изображения аватара в байтах.
+
+    Returns:
+        str: Хэш обработанного изображения, используемый в качестве уникального идентификатора.
+
+    """
+
     image_data = BytesIO(avatar_data)
 
     image_hash = hashlib.md5(image_data.getvalue()).hexdigest()
@@ -56,6 +66,21 @@ def add_watermark(avatar_data: bytes) -> str:
 async def create(avatar: UploadFile,
                  user: am.User = Depends(am.User.as_form),
                  db: AsyncSession = Depends(database)):
+    """
+    Создает нового пользователя и добавляет запись в базу данных.
+
+    Args:
+        avatar (UploadFile): Изображение аватара, загруженное пользователем.
+        user (am.User): Данные формы пользователя, содержащие имя, адрес электронной почты и т. д.
+        db (AsyncSession): Сеанс базы данных.
+
+    Returns:
+        str: Сообщение об успешном создании аккаунта.
+
+    Raises:
+        HTTPException: Если адрес электронной почты уже используется.
+    """
+
     try:
         avatar_bytes = await avatar.read()
 
@@ -85,6 +110,22 @@ async def match(
         email: EmailStr = Query(description="Почта текущего пользователя"),
         db: AsyncSession = Depends(database)
 ):
+    """
+    Добавляет оценку текущего пользователя другому пользователю и проверяет наличие взаимного интереса.
+    Отправляет уведомление по электронной почте в случае взаимного соответствия.
+
+    Args:
+        id (int): Идентификатор оцениваемого пользователя.
+        email (EmailStr): Адрес электронной почты текущего пользователя.
+        db (AsyncSession): Сеанс базы данных.
+
+    Returns:
+        dict: Сообщение, указывающее на успех или взаимный интерес.
+
+    Raises: HTTPException: Если пользователь не найден, пользователь сам себя оценил, превысил дневной лимит или
+    пользователь уже оценил.
+    """
+
     try:
         current_user = (await db.execute(select(sm.User).where(sm.User.email == email))).scalar_one_or_none()
         receiver = (await db.execute(select(sm.User).where(sm.User.id == id))).scalar_one_or_none()
